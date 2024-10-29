@@ -50,7 +50,7 @@ Screen* createModeScreen(){
     Screen *modeScreen = (Screen*)malloc(sizeof(Screen));
     modeScreen->screenName = "MODE SCREEN";
     modeScreen->textInputCount = 0;
-    modeScreen->buttonCount = 2;
+    modeScreen->buttonCount = 4;
     modeScreen->checkBoxCount = 3;
 
      SDL_Color textColorGrey = { 70, 70, 70};
@@ -58,8 +58,10 @@ Screen* createModeScreen(){
      SDL_Color textColorRed = { 250, 0, 0};
     // create the necessary elements of the screen
     modeScreen->buttons = malloc(modeScreen->buttonCount * sizeof(Button));
-    modeScreen->buttons[0] = createButton("assets/buttons/default-button.png", "Play", textColorGrey, 0, .9, .9, 300, 75);
-    modeScreen->buttons[1] = createButton("assets/buttons/default-button.png", "< Back", textColorRed, 0, .1, .1, 200, 55);
+    modeScreen->buttons[0] = createButton("assets/Window.png", "", textColorGrey, 0, .5, .5, screenWidth-(screenWidth*0.1), screenHeight-(screenHeight*0.1));
+    modeScreen->buttons[1] = createButton("assets/buttons/default-button.png", "Play", textColorGrey, 0, .9, .9, 300, 75);
+    modeScreen->buttons[2] = createButton("assets/buttons/small_button.png", "", textColorRed, 0, .1, .1, 30, 30);
+    modeScreen->buttons[3] = createButton("assets/buttons/close_button.png", "", textColorRed, 0, .1, .1, 25, 25);
 
     modeScreen->checkBoxes = malloc(modeScreen->checkBoxCount * sizeof(CheckBox));
     modeScreen->checkBoxes[0] = createCheckbox("assets/buttons/Windows_Toggle_Active.png", "assets/buttons/Windows_Toggle_Selected.png", "Easy Mode (9x9 - 10 mines)", textColorWhite, 1, .3, .3, 40, 40);
