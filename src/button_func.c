@@ -171,7 +171,7 @@ void handleCheckBoxClick(Screen* screen, int mouseX, int mouseY) {
         if (mouseX > checkbox->position.x && mouseX < checkbox->position.x + checkbox->width &&
             mouseY > checkbox->position.y && mouseY < checkbox->position.y + checkbox->height) {
             if (checkbox->onClick) {
-                checkbox->onClick();
+                checkbox->onClick(screen);
             }
         }
     }

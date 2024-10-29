@@ -204,7 +204,7 @@
 	"begin_code.h"
 	"close_code.h"
 
-1730233281 source:c:\users\hamza\desktop\bme\hwbme\minesweeper game v1.0\main.c
+1730235129 source:c:\users\hamza\desktop\bme\hwbme\minesweeper game v1.0\main.c
 	<stdio.h>
 	<SDL.h>
 	<SDL_ttf.h>
@@ -226,7 +226,7 @@
 	<SDL_image.h>
 	"struct.h"
 
-1730233524 source:c:\users\hamza\desktop\bme\hwbme\minesweeper game v1.0\src\button_func.c
+1730236134 source:c:\users\hamza\desktop\bme\hwbme\minesweeper game v1.0\src\button_func.c
 	"../include/struct.h"
 	"../include/button_func.h"
 	<SDL.h>
@@ -238,7 +238,7 @@
 	<SDL.h>
 	"struct.h"
 
-1730234704 source:c:\users\hamza\desktop\bme\hwbme\minesweeper game v1.0\src\screen_manager.c
+1730235575 source:c:\users\hamza\desktop\bme\hwbme\minesweeper game v1.0\src\screen_manager.c
 	"../include/struct.h"
 	"../include/button_func.h"
 	"../include/screen_manager.h"

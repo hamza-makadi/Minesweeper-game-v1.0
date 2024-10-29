@@ -8,7 +8,7 @@
 #include "include/background_renderer.h"
 
 // Global variables definition
-int screenWidth = 800;
+int screenWidth = 1000;
 int screenHeight = 600;
 
 int currentScreen = 0;

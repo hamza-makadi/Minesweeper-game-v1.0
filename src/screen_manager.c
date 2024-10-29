@@ -4,6 +4,9 @@
 #include <SDL.h>
 #include <SDL_ttf.h>
 #include <SDL_image.h>
+void toMenuGameScreen(){
+    currentScreen = 0;
+}
 
 void toContinueGameScreen(){
     currentScreen = 1;
@@ -19,6 +22,45 @@ void toSettingsScreen(){
 
 void ExitGame(){
     GameState = 0;
+}
+
+void ActiveEasyMode(Screen *screen){
+    int buttonState = screen->checkBoxes[0].isChecked;
+    if(buttonState==0){
+        screen->checkBoxes[0].isChecked = 1;
+        screen->checkBoxes[1].isChecked = 0;
+        screen->checkBoxes[2].isChecked = 0;
+    }else{
+        screen->checkBoxes[0].isChecked = 0;
+        screen->checkBoxes[1].isChecked = 0;
+        screen->checkBoxes[2].isChecked = 0;
+    }
+}
+
+void ActiveMediumMode(Screen *screen){
+    int buttonState = screen->checkBoxes[1].isChecked;
+    if(buttonState==0){
+        screen->checkBoxes[0].isChecked = 0;
+        screen->checkBoxes[1].isChecked = 1;
+        screen->checkBoxes[2].isChecked = 0;
+    }else{
+        screen->checkBoxes[0].isChecked = 0;
+        screen->checkBoxes[1].isChecked = 0;
+        screen->checkBoxes[2].isChecked = 0;
+    }
+}
+
+void ActiveHardMode(Screen *screen){
+    int buttonState = screen->checkBoxes[2].isChecked;
+    if(buttonState==0){
+        screen->checkBoxes[0].isChecked = 0;
+        screen->checkBoxes[1].isChecked = 0;
+        screen->checkBoxes[2].isChecked = 1;
+    }else{
+        screen->checkBoxes[0].isChecked = 0;
+        screen->checkBoxes[1].isChecked = 0;
+        screen->checkBoxes[2].isChecked = 0;
+    }
 }
 
 Screen* createMenuScreen(){
@@ -60,13 +102,22 @@ Screen* createModeScreen(){
     modeScreen->buttons = malloc(modeScreen->buttonCount * sizeof(Button));
     modeScreen->buttons[0] = createButton("assets/Window.png", "", textColorGrey, 0, .5, .5, screenWidth-(screenWidth*0.1), screenHeight-(screenHeight*0.1));
     modeScreen->buttons[1] = createButton("assets/buttons/default-button.png", "Play", textColorGrey, 0, .9, .9, 300, 75);
-    modeScreen->buttons[2] = createButton("assets/buttons/small_button.png", "", textColorRed, 0, .1, .1, 30, 30);
-    modeScreen->buttons[3] = createButton("assets/buttons/close_button.png", "", textColorRed, 0, .1, .1, 25, 25);
+    modeScreen->buttons[2] = createButton("assets/buttons/small_button.png", "", textColorRed, 0, .1, .1, 50, 50);
+    modeScreen->buttons[3] = createButton("assets/buttons/close_button.png", "", textColorRed, 0, .1, .1, 45, 45);
+
+    modeScreen->buttons[2].onClick = toMenuGameScreen;
 
     modeScreen->checkBoxes = malloc(modeScreen->checkBoxCount * sizeof(CheckBox));
-    modeScreen->checkBoxes[0] = createCheckbox("assets/buttons/Windows_Toggle_Active.png", "assets/buttons/Windows_Toggle_Selected.png", "Easy Mode (9x9 - 10 mines)", textColorWhite, 1, .3, .3, 40, 40);
-    modeScreen->checkBoxes[1] = createCheckbox("assets/buttons/Windows_Toggle_Active.png", "assets/buttons/Windows_Toggle_Selected.png", "Medium Mode (16x16 - 40 mines)", textColorWhite, 1, .3, .5, 40, 40);
-    modeScreen->checkBoxes[2] = createCheckbox("assets/buttons/Windows_Toggle_Active.png", "assets/buttons/Windows_Toggle_Selected.png", "Hard Mode (30x16 - 99 mines)", textColorWhite, 1, .3, .7, 40, 40);
+    modeScreen->checkBoxes[0] = createCheckbox("assets/buttons/Windows_Toggle_Active.png", "assets/buttons/Windows_Toggle_Selected.png", "Easy Mode (9x9 - 10 mines)", textColorWhite, 1, .2, .3, 40, 40);
+    modeScreen->checkBoxes[1] = createCheckbox("assets/buttons/Windows_Toggle_Active.png", "assets/buttons/Windows_Toggle_Selected.png", "Medium Mode (16x16 - 40 mines)", textColorWhite, 1, .2, .5, 40, 40);
+    modeScreen->checkBoxes[2] = createCheckbox("assets/buttons/Windows_Toggle_Active.png", "assets/buttons/Windows_Toggle_Selected.png", "Hard Mode (30x16 - 99 mines)", textColorWhite, 1, .2, .7, 40, 40);
+
+    modeScreen->checkBoxes[0].isChecked = 1;
+
+    modeScreen->checkBoxes[0].onClick = ActiveEasyMode;
+    modeScreen->checkBoxes[1].onClick = ActiveMediumMode;
+    modeScreen->checkBoxes[2].onClick = ActiveHardMode;
+
     return modeScreen;
 }
 
