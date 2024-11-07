@@ -1,12 +1,12 @@
 # depslib dependency file v1.0
-1730152068 source:c:\users\hamza\desktop\bme\hwbme\minesweeper game v1.0\src\sdl_init.c
+1731010161 source:c:\users\hamza\desktop\bme\hwbme\minesweeper game v1.0\src\sdl_init.c
 	"../include/sdl_init.h"
 	"../include/struct.h"
 	<SDL.h>
 	<SDL_ttf.h>
 	<SDL_image.h>
 
-1730213068 c:\users\hamza\desktop\bme\hwbme\minesweeper game v1.0\include\struct.h
+1731010384 c:\users\hamza\desktop\bme\hwbme\minesweeper game v1.0\include\struct.h
 	<SDL.h>
 	<SDL_ttf.h>
 	<SDL_image.h>
@@ -204,7 +204,7 @@
 	"begin_code.h"
 	"close_code.h"
 
-1730235129 source:c:\users\hamza\desktop\bme\hwbme\minesweeper game v1.0\main.c
+1731008219 source:c:\users\hamza\desktop\bme\hwbme\minesweeper game v1.0\main.c
 	<stdio.h>
 	<SDL.h>
 	<SDL_ttf.h>
@@ -213,6 +213,7 @@
 	"include/sdl_init.h"
 	"include/screen_manager.h"
 	"include/background_renderer.h"
+	"include/game_manager.h"
 
 1730148529 c:\users\hamza\desktop\bme\hwbme\minesweeper game v1.0\include\sdl_init.h
 	<SDL.h>
@@ -220,13 +221,13 @@
 	<SDL_image.h>
 	"struct.h"
 
-1730230259 c:\users\hamza\desktop\bme\hwbme\minesweeper game v1.0\include\screen_manager.h
+1730461269 c:\users\hamza\desktop\bme\hwbme\minesweeper game v1.0\include\screen_manager.h
 	<SDL.h>
 	<SDL_ttf.h>
 	<SDL_image.h>
 	"struct.h"
 
-1730236134 source:c:\users\hamza\desktop\bme\hwbme\minesweeper game v1.0\src\button_func.c
+1731009159 source:c:\users\hamza\desktop\bme\hwbme\minesweeper game v1.0\src\button_func.c
 	"../include/struct.h"
 	"../include/button_func.h"
 	<SDL.h>
@@ -234,11 +235,11 @@
 	<SDL_image.h>
 	<string.h>
 
-1730233038 c:\users\hamza\desktop\bme\hwbme\minesweeper game v1.0\include\button_func.h
+1730991884 c:\users\hamza\desktop\bme\hwbme\minesweeper game v1.0\include\button_func.h
 	<SDL.h>
 	"struct.h"
 
-1730235575 source:c:\users\hamza\desktop\bme\hwbme\minesweeper game v1.0\src\screen_manager.c
+1731010017 source:c:\users\hamza\desktop\bme\hwbme\minesweeper game v1.0\src\screen_manager.c
 	"../include/struct.h"
 	"../include/button_func.h"
 	"../include/screen_manager.h"
@@ -251,8 +252,24 @@
 	<SDL_ttf.h>
 	<SDL_image.h>
 
-1730213086 source:c:\users\hamza\desktop\bme\hwbme\minesweeper game v1.0\src\background_renderer.c
+1731008727 source:c:\users\hamza\desktop\bme\hwbme\minesweeper game v1.0\src\background_renderer.c
 	"../include/struct.h"
 	"../include/background_renderer.h"
 	<math.h>
+
+1731007108 c:\users\hamza\desktop\bme\hwbme\minesweeper game v1.0\include\game_manager.h
+	<SDL.h>
+	<SDL_ttf.h>
+	<SDL_image.h>
+	"struct.h"
+
+1731009842 source:c:\users\hamza\desktop\bme\hwbme\minesweeper game v1.0\src\game_manager.c
+	"../include/game_manager.h"
+	"../include/struct.h"
+	"../include/button_func.h"
+	<SDL.h>
+	<SDL_ttf.h>
+	<SDL_image.h>
+	<stdlib.h>
+	<time.h>
 

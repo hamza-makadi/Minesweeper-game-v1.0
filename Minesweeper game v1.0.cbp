@@ -52,6 +52,7 @@
 		</Linker>
 		<Unit filename="include/background_renderer.h" />
 		<Unit filename="include/button_func.h" />
+		<Unit filename="include/game_manager.h" />
 		<Unit filename="include/screen_manager.h" />
 		<Unit filename="include/sdl_init.h" />
 		<Unit filename="include/struct.h" />
@@ -62,6 +63,9 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="src/button_func.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/game_manager.c">
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="src/screen_manager.c">

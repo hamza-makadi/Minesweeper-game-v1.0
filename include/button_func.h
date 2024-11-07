@@ -4,6 +4,9 @@
 #include <SDL.h>
 #include "struct.h"
 
+// Function to load and resize an image
+SDL_Surface* loadAndResizeImage(const char *file, int width, int height);
+
 /**BUTTON FUNCTIONS**/
 // Function to load and resize an image
 SDL_Surface* loadAndResizeImage(const char *file, int width, int height);
@@ -18,7 +21,7 @@ void renderButton(SDL_Surface *screen, Button *button);
 void freeButton(Button *button);
 
 // Function to handle button clicks
-void handleButtonClick(Screen* screen, int mouseX, int mouseY);
+int handleButtonClick(Screen* screen, int mouseX, int mouseY);
 
 /**CHECKBOX FUNCTIONS**/
 // Function to create a checkbox

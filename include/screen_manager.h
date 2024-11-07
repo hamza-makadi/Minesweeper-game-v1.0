@@ -12,6 +12,9 @@ Screen* createMenuScreen();
 // Function to initialize mode screen
 Screen* createModeScreen();
 
+// Function to initialize game screen
+Screen* createGameScreen();
+
 // Function to render any screen
 void renderScreen(Screen *Screen, SDL_Surface *screen);
 
