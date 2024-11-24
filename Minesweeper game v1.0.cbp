@@ -33,6 +33,7 @@
 			<Add directory="C:/Users/hamza/Desktop/SDL-1.2.14/include" />
 			<Add directory="C:/Users/hamza/Desktop/sdl_image/mingw64/include" />
 			<Add directory="C:/Users/hamza/Desktop/SDL-ttf/include" />
+			<Add directory="C:/Users/hamza/Desktop/sdl_mixer/mingw64/include" />
 		</Compiler>
 		<Linker>
 			<Add library="mingw32" />
@@ -49,6 +50,7 @@
 			<Add directory="C:/Users/hamza/Desktop/SDL-1.2.14/lib" />
 			<Add directory="C:/Users/hamza/Desktop/sdl_image/mingw64/lib" />
 			<Add directory="C:/Users/hamza/Desktop/SDL-ttf/lib" />
+			<Add directory="C:/Users/hamza/Desktop/sdl_mixer/mingw64/lib" />
 		</Linker>
 		<Unit filename="include/background_renderer.h" />
 		<Unit filename="include/button_func.h" />

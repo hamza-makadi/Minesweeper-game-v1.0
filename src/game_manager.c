@@ -6,6 +6,7 @@
 #include <SDL_image.h>
 #include <stdlib.h>
 #include <time.h>
+#include <string.h>
 
 /**
  * Initializes the game by setting up the grid, loading the necessary images, and allocating memory for the assets.
@@ -17,11 +18,16 @@
  */
 void initializeGame(Game *game) {
     // Initialize basic game properties
+    game->gameState = 0;  // Indicates the game is still on ( the player did not lose yet )
     game->firstClick = 0;  // Indicates if the user has clicked for the first time
     game->rows = gameRowsNum;  // Number of rows in the grid
     game->cols = gameColsNum;  // Number of columns in the grid
     game->numMines = gameMinesNum;  // Number of mines in the grid
+    game->flagCount = 0;  // Number of flags
     game->cellSize = cellSize;  // Size of each cell in the grid
+    game->startTime = SDL_GetTicks();
+    game->elapsedTime = (SDL_GetTicks() - game->startTime) / 1000 ; // elapsed time in seconds
+    game->pausedTime = 0;
 
     // Allocate memory for 12 images representing game assets (numbers, bomb, flag, etc.)
     game->assets = malloc(12 * sizeof(SDL_Surface*));
@@ -115,6 +121,17 @@ void drawCell(SDL_Surface *screen, Cell cell, int x, int y, Game* game) {
     SDL_BlitSurface(game->assets[ImageIndex], NULL, screen, &destRect);
 }
 
+void drawTimer(SDL_Surface *screen, Game *game){
+    game->elapsedTime =game->pausedTime + (SDL_GetTicks() - game->startTime)/1000 ; // Update elapsed time
+    char timeText[10];
+    sprintf(timeText, "%02d:%02d", game->elapsedTime / 60, game->elapsedTime % 60);
+    SDL_Color textColor = { 250, 250, 250 };
+    SDL_Surface* timeSurface = TTF_RenderText_Solid(fonts[3], timeText, textColor);
+    SDL_Rect timePosition = { .x = screenWidth-150, .y = 20 };  // Adjust position as needed
+    SDL_BlitSurface(timeSurface, NULL, screen, &timePosition);
+    SDL_FreeSurface(timeSurface);
+}
+
 /**
  * Draws the entire grid of cells on the game screen.
  * It iterates through each cell in the grid and draws it at the appropriate position
@@ -126,12 +143,17 @@ void drawCell(SDL_Surface *screen, Cell cell, int x, int y, Game* game) {
  *                 and cell size.
  */
 void drawGrid(SDL_Surface *screen, Game *game) {
-    int i, j;
+    // draw the timer on the screen
+    drawTimer(screen, game);
+
+    int i, j, shiftX, shiftY;
     // Loop through all rows and columns in the grid
     for (i = 0; i < game->rows; i++) {
         for (j = 0; j < game->cols; j++) {
-            // Draw each cell at the calculated position (j * cellSize, i * cellSize)
-            drawCell(screen, game->grid[i][j], j * game->cellSize , i * game->cellSize, game);
+            shiftX = (screenWidth-game->cellSize*game->cols)/2;
+            shiftY = screenHeight-game->cellSize*game->rows-50;
+            // Draw each cell at the calculated position (j * cellSize+ shiftX, i * cellSize + shiftY)
+            drawCell(screen, game->grid[i][j], (j * game->cellSize)+shiftX , (i * game->cellSize)+shiftY, game);
         }
     }
 }
@@ -254,6 +276,60 @@ void floodFill(Game *game, int row, int col) {
     }
 }
 
+void saveTimeIfBest(Game* game) {
+    FILE* file = fopen("time.dat", "rb"); // Open in binary read mode
+    Uint32 times[4]; // To store the current times + new elapsedTime
+    int count = 0;
+
+    // Check if file exists and read times
+    if (file) {
+        while (fread(&times[count], sizeof(Uint32), 1, file) == 1 && count < 3) { // Read each Uint32
+            count++;
+        }
+        fclose(file);
+    }
+
+    // Add the new elapsed time
+    times[count++] = game->elapsedTime;
+
+    // Sort the times in ascending order
+    int i, j;
+    for (i = 0; i < count - 1; i++) {
+        for (j = i + 1; j < count; j++) {
+            if (times[i] > times[j]) {
+                Uint32 temp = times[i];
+                times[i] = times[j];
+                times[j] = temp;
+            }
+        }
+    }
+
+    // Write the best three times back to the file in binary mode
+    file = fopen("time.dat", "wb"); // Open in binary write mode
+    if (!file) {
+        perror("Failed to open file for writing");
+        return;
+    }
+    for (i = 0; i < count && i < 3; i++) {
+        fwrite(&times[i], sizeof(Uint32), 1, file); // Write each Uint32 value
+    }
+    fclose(file);
+}
+
+int checkWin(Game* game) {
+    int i, j;
+    for (i = 0; i < game->rows; i++) {
+        for (j = 0; j < game->cols; j++) {
+            // If a non-mine cell is not revealed, the player hasn't won
+            if ((!game->grid[i][j].isMine) && !(game->grid[i][j].isRevealed)) {
+                return 0;
+            }
+        }
+    }
+    // save time if it's top 3
+    saveTimeIfBest(game);
+    return 1; // All conditions satisfied, player has won
+}
 
 /**
  * Handles a cell click event in the game. This function determines the clicked cell's position based on the mouse coordinates,
@@ -266,22 +342,82 @@ void floodFill(Game *game, int row, int col) {
  *   - int mouseX: The x-coordinate of the mouse click, which determines the column.
  *   - int mouseY: The y-coordinate of the mouse click, which determines the row.
  */
-void handleCellClick(Game *game, int mouseX, int mouseY) {
-    // Assuming the top-left corner of the grid is at (0, 0)
-    int row = mouseY / game->cellSize;  // Determine the row clicked
-    int col = mouseX / game->cellSize;  // Determine the column clicked
+void handleCellClick(Game *game, int mouseX, int mouseY, PlayerStats *playerStats) {
+    // Calculate grid coordinates
+    int shiftX = (screenWidth - game->cellSize * game->cols) / 2;
+    int shiftY = screenHeight - game->cellSize * game->rows - 50;
+    int col = (mouseX - shiftX) / game->cellSize;
+    int row = (mouseY - shiftY) / game->cellSize;
 
-    // Check if the click is inside the grid bounds
-    if (row >= 0 && row < game->rows && col >= 0 && col < game->cols) {
-        // if the user clicks for the first time, we set the mines to ensure that the first cell is not a mine
-        if(game->firstClick==0){
-            game->firstClick = 1;
-            placeMines(game, row, col);
-            calculateAdjacentMines(game);
-        }
-        floodFill(game, row, col);  // Perform flood fill starting from the clicked cell
+    // Check if click is within grid bounds
+    if (row < 0 || row >= game->rows || col < 0 || col >= game->cols) {
+        return;
+    }
+
+    Cell *clickedCell = &game->grid[row][col];
+
+    // First click: Place mines and calculate adjacent mines
+    if (!game->firstClick) {
+        placeMines(game, row, col);
+        calculateAdjacentMines(game);
+        game->startTime = SDL_GetTicks();  // Start the timer
+        game->firstClick = 1;
+    }
+
+    // Process cell based on its state
+    if (clickedCell->isFlagged || clickedCell->isRevealed) {
+        return;  // Ignore clicks on flagged or already revealed cells
+    }
+
+    if (clickedCell->isMine) {
+        game->gameState = 1;
+        playerStats->gamesPlayed++;
+        playerStats->WinStreak = 0;
+        currentScreen = 5;
+        return;
+    }
+
+    if (clickedCell->adjacentMines == 0) {
+        floodFill(game, row, col);  // Reveal empty region
+    } else {
+        clickedCell->isRevealed = 1;  // Reveal the clicked cell
+    }
+    if (checkWin(game)==1) {
+        game->gameState = 2;
+        playerStats->gamesPlayed++;
+        playerStats->gamesWon++;
+        playerStats->WinStreak++;
+        currentScreen = 5;
     }
 }
+
+void handleFlagClick(Game *game, int mouseX, int mouseY) {
+    // Calculate grid coordinates
+    int shiftX = (screenWidth - game->cellSize * game->cols) / 2;
+    int shiftY = screenHeight - game->cellSize * game->rows - 50;
+    int col = (mouseX - shiftX) / game->cellSize;
+    int row = (mouseY - shiftY) / game->cellSize;
+
+    // Check if click is within grid bounds
+    if (row < 0 || row >= game->rows || col < 0 || col >= game->cols) {
+        return;
+    }
+
+    Cell *clickedCell = &game->grid[row][col];
+
+    // Process cell based on its state
+    if (!clickedCell->isRevealed) {
+        clickedCell->isFlagged = !clickedCell->isFlagged;
+
+        // Update the count of flagged cells
+        if (clickedCell->isFlagged) {
+            game->flagCount++;
+        } else {
+            game->flagCount--;
+        }
+    }
+}
+
 
 /**
  * Saves the current game grid, including rows, columns, and cell data, to a binary .dat file.
@@ -299,12 +435,17 @@ void saveGameGrid(Game *game, const char *filename) {
         return;
     }
 
+    game->pausedTime = game->elapsedTime;
+
     // Write rows and cols
+    fwrite(&game->gameState, sizeof(int), 1, file);
     fwrite(&game->firstClick, sizeof(int), 1, file);
     fwrite(&game->rows, sizeof(int), 1, file);
     fwrite(&game->cols, sizeof(int), 1, file);
     fwrite(&game->numMines, sizeof(int), 1, file);
+    fwrite(&game->flagCount, sizeof(int), 1, file);
     fwrite(&game->cellSize, sizeof(int), 1, file);
+    fwrite(&game->pausedTime, sizeof(Uint32), 1, file);
 
     // Write grid data
     int i,j;
@@ -334,11 +475,15 @@ void loadGameGrid(Game *game, const char *filename) {
     }
 
     // Read rows and cols
+    fread(&game->gameState, sizeof(int), 1, file);
     fread(&game->firstClick, sizeof(int), 1, file);
     fread(&game->rows, sizeof(int), 1, file);
     fread(&game->cols, sizeof(int), 1, file);
     fread(&game->numMines, sizeof(int), 1, file);
+    fread(&game->flagCount, sizeof(int), 1, file);
     fread(&game->cellSize, sizeof(int), 1, file);
+    fread(&game->pausedTime, sizeof(Uint32), 1, file);
+
 
     // Load images
     game->assets[0] = loadAndResizeImage("assets/images/1.jpg", game->cellSize, game->cellSize);
@@ -392,4 +537,163 @@ void freeGameGrid(Game *game) {
     }
     free(game->grid); // Free the grid itself
     game->grid = NULL; // Set the grid pointer to NULL to avoid dangling references
+}
+
+
+// Function to save achievements to a file
+void saveAchievementsToFile(Achievement achievements[], int totalAchievements, PlayerStats *playerStats) {
+    FILE *file = fopen("achievements.dat", "wb"); // Open file in binary write mode
+    if (file == NULL) {
+        printf("Error: Could not open file achievements.dat for saving achievements.\n");
+        return;
+    }
+
+    // Write the achievements array to the file
+    fwrite(playerStats, sizeof(PlayerStats), 1, file);
+    size_t written = fwrite(achievements, sizeof(Achievement), totalAchievements, file);
+    if (written != totalAchievements) {
+        printf("Error: Could not save all achievements to the file.\n");
+    } else {
+        printf("Achievements saved successfully to achievements.dat.\n");
+    }
+
+    fclose(file); // Close the file
+}
+
+void loadAchievementsFromFile(Achievement achievements[], int totalAchievements, PlayerStats *playerStats) {
+    FILE *file = fopen("achievements.dat", "rb"); // Open file in binary read mode
+    if (file == NULL) {
+        printf("No achievement file found. Initializing new achievements.\n");
+        initializeAchievements(achievements, playerStats); // Initialize achievements
+        return;
+    }
+
+    // Read the achievements array from the file
+    fread(playerStats, sizeof(PlayerStats), 1, file);
+    size_t read = fread(achievements, sizeof(Achievement), totalAchievements, file);
+    if (read != totalAchievements) {
+        printf("Error: Could not load all achievements from the file.\n");
+        initializeAchievements(achievements, playerStats); // Reinitialize if there's an issue
+    } else {
+        printf("Achievements loaded successfully from achievements.dat.\n");
+    }
+
+    fclose(file); // Close the file
+}
+
+void initializeAchievements(Achievement achievements[], PlayerStats *playerStats) {
+    playerStats->gamesPlayed = 0;
+    playerStats->gamesWon = 0;
+    playerStats->WinStreak = 0;
+
+    // Achievement 1: Win a game
+    strcpy(achievements[0].name, "Win a game");
+    achievements[0].isUnlocked = 0;
+
+    // Achievement 2: Win a game under 5 minutes
+    strcpy(achievements[1].name, "Win a game under 5 min");
+    achievements[1].isUnlocked = 0;
+
+    // Achievement 3: Play 10 games
+    strcpy(achievements[2].name, "Play 10 games");
+    achievements[2].isUnlocked = 0;
+
+    // Achievement 4: Play 50 games
+    strcpy(achievements[3].name, "Play 50 games");
+    achievements[3].isUnlocked = 0;
+
+    // Achievement 5: Play 100 games
+    strcpy(achievements[4].name, "Play 100 games");
+    achievements[4].isUnlocked = 0;
+
+    // Achievement 6: Win 2 games in a row
+    strcpy(achievements[5].name, "Win 2 games in a row");
+    achievements[5].isUnlocked = 0;
+
+    // Achievement 7: Win 10 games
+    strcpy(achievements[6].name, "Win 10 games");
+    achievements[6].isUnlocked = 0;
+
+    // Achievement 8: Play 500 games
+    strcpy(achievements[7].name, "Play 500 games");
+    achievements[7].isUnlocked = 0;
+
+    // Achievement 9: Complete a game under 8 minutes
+    strcpy(achievements[8].name, "Win a game under 8 min");
+    achievements[8].isUnlocked = 0;
+
+    // Achievement 10: Win 5 games in a row
+    strcpy(achievements[9].name, "Win 5 games in a row");
+    achievements[9].isUnlocked = 0;
+
+    // Achievement 11: Win 100 games.
+    strcpy(achievements[10].name, "Win 100 games");
+    achievements[10].isUnlocked = 0;
+
+    // Achievement 12: Win 100 games.
+    strcpy(achievements[11].name, "Play 1000 games");
+    achievements[11].isUnlocked = 0;
+
+}
+
+void checkAchievements(Achievement achievements[], PlayerStats playerStats, Game game) {
+    // Win a game
+    if (playerStats.gamesWon == 1 && achievements[0].isUnlocked == 0) {
+        achievements[0].isUnlocked = 1;
+    }
+
+    // Win a game under 5 minutes
+    if (game.gameState == 2 && game.elapsedTime < 300 && achievements[1].isUnlocked == 0) {
+        achievements[1].isUnlocked = 1;
+    }
+
+    // Play 10 games
+    if (playerStats.gamesPlayed == 10 && achievements[2].isUnlocked == 0) {
+        achievements[2].isUnlocked = 1;
+    }
+
+    // Play 50 games
+    if (playerStats.gamesPlayed == 50 && achievements[3].isUnlocked == 0) {
+        achievements[3].isUnlocked = 1;
+    }
+
+    // Play 100 games
+    if (playerStats.gamesPlayed == 100 && achievements[4].isUnlocked == 0) {
+        achievements[4].isUnlocked = 1;
+    }
+
+    // Win 2 games in a row
+    if (playerStats.WinStreak == 2 && achievements[5].isUnlocked == 0) {
+        achievements[5].isUnlocked = 1;
+    }
+
+    // Win 10 games
+    if (playerStats.gamesWon == 10 && achievements[6].isUnlocked == 0) {
+        achievements[6].isUnlocked = 1;
+    }
+
+     // Play 500 games
+    if (playerStats.gamesPlayed == 500 && achievements[7].isUnlocked == 0) {
+        achievements[7].isUnlocked = 1;
+    }
+
+    // Win a game under 8 minutes
+    if (game.gameState == 2 && game.elapsedTime < 480 && achievements[8].isUnlocked == 0) {
+        achievements[8].isUnlocked = 1;
+    }
+
+    // Win 5 games in a row
+    if (playerStats.WinStreak == 5 && achievements[9].isUnlocked == 0) {
+        achievements[9].isUnlocked = 1;
+    }
+
+    // Win 100 games
+    if (playerStats.gamesWon == 100 && achievements[10].isUnlocked == 0) {
+        achievements[10].isUnlocked = 1;
+    }
+
+    // Play 1000 games
+    if (playerStats.gamesPlayed == 1000 && achievements[11].isUnlocked == 0) {
+        achievements[11].isUnlocked = 1;
+    }
 }

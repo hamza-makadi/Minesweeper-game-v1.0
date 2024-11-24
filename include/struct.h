@@ -10,6 +10,7 @@
 // Global variables
 #define MAX_TEXTINPUT_LENGTH 100
 #define NUM_FONTS 5
+#define TOTAL_ACHIEVEMENTS 12
 
 extern int screenWidth;
 extern int screenHeight;
@@ -38,15 +39,6 @@ extern int cellSize;                                // cell size based on the di
 
 extern TTF_Font *fonts[NUM_FONTS];
 
-// structure for text input field
-typedef struct {
-    char text[MAX_TEXTINPUT_LENGTH];
-    TTF_Font *font;
-    SDL_Color color;
-    SDL_Rect position;
-    SDL_Surface *screen;
-} TextInput;
-
 // Button structure
 typedef struct {
     SDL_Surface *image;
@@ -60,7 +52,7 @@ typedef struct {
     void (*onClick)();
 } Button;
 
-// Button structure
+// Checkbox structure
 typedef struct {
     SDL_Surface *imageChecked;
     SDL_Surface *imageNotChecked;
@@ -77,10 +69,8 @@ typedef struct {
 //structure to define what elements are in each screen
 typedef struct {
     const char *screenName;
-    TextInput *textInputs;
     Button *buttons;
     CheckBox *checkBoxes;
-    int textInputCount;
     int buttonCount;
     int checkBoxCount;
 } Screen;
@@ -95,13 +85,29 @@ typedef struct {
 
 // Struct to hold game data
 typedef struct {
+    int gameState;               // if the game in a win or lose state or still on (stillOn : 0 // lose : 1 // win : 2)
     int firstClick;                  // First click for the user
     int rows;                       // Number of rows in the grid
     int cols;                       // Number of columns in the grid
     int numMines;             // Number of mines based on game mode
-    int cellSize;
+    int flagCount;             // Number of flags
+    int cellSize;                // Size of the cell
+    Uint32 startTime;       // time when the game start
+    Uint32 elapsedTime;  // time since the game started
+    Uint32 pausedTime;  // time when the player pauses the game
     SDL_Surface **assets; // Images of the game like bomb,numbers and empty cell
     Cell **grid;                 // Pointer to a 2D array of Cells
 } Game;
+// struct for achievement and player stats
+typedef struct {
+    char name[50];
+    int isUnlocked;  // 0 = locked, 1 = unlocked
+} Achievement;
+
+typedef struct {
+    int gamesPlayed;
+    int gamesWon;
+    int WinStreak;
+} PlayerStats;
 
 #endif

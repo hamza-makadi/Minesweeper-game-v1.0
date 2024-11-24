@@ -23,9 +23,8 @@ SDL_Surface* loadAndResizeImage(const char *file, int width, int height) {
     // Load the image file into a temporary surface
     SDL_Surface *temp = IMG_Load(file);
     if (!temp) {
-        // If loading fails, print error message and set game state to GAME_OFF
+        // If loading fails, print error message
         printf("Failed to load image: %s\n", IMG_GetError());
-        gameState = GAME_OFF;
         return NULL;
     }
 
@@ -122,7 +121,7 @@ void renderButton(SDL_Surface *screen, Button *button) {
     if (strcmp(button->text, "") != 0) {
 
         // Render the button's text to a surface with the specified font and color
-        SDL_Surface *textSurface = TTF_RenderText_Solid(fonts[2], button->text, button->textColor);
+        SDL_Surface *textSurface = TTF_RenderText_Solid(fonts[1], button->text, button->textColor);
 
         // If text rendering fails, output an error and stop rendering
         if (!textSurface) {
@@ -203,6 +202,7 @@ int handleButtonClick(Screen* screen, int mouseX, int mouseY) {
         }
     }
 
+
     return 0; // Return 0 if no button was clicked
 }
 
@@ -274,14 +274,16 @@ CheckBox createCheckbox(const char *imageFileChecked, const char *imageFileNotCh
 void renderCheckbox(SDL_Surface *screen, CheckBox *button) {
 
     // Check if both the checked and unchecked images are loaded
-    if (button->imageChecked && button->imageNotChecked) {
-        // Render the appropriate image based on the checkbox's state
-        if (button->isChecked == 0) {
-            // Render the checked state if the checkbox is unchecked
-            SDL_BlitSurface(button->imageChecked, NULL, screen, &button->position);
-        } else {
-            // Render the unchecked state if the checkbox is checked
-            SDL_BlitSurface(button->imageNotChecked, NULL, screen, &button->position);
+    if(button->imageChecked && button->imageNotChecked){
+        if (button->imageChecked && button->imageNotChecked) {
+            // Render the appropriate image based on the checkbox's state
+            if (button->isChecked == 0) {
+                // Render the checked state if the checkbox is unchecked
+                SDL_BlitSurface(button->imageChecked, NULL, screen, &button->position);
+            } else {
+                // Render the unchecked state if the checkbox is checked
+                SDL_BlitSurface(button->imageNotChecked, NULL, screen, &button->position);
+            }
         }
     }
 

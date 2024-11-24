@@ -3,6 +3,7 @@
 #include <SDL.h>
 #include <SDL_ttf.h>
 #include <SDL_image.h>
+#include <SDL_mixer.h>
 
 /**
  * Initializes SDL and sets up the window for the game.
@@ -22,6 +23,17 @@ void initialize_sdl(SDL_Surface **window) {
         gameState = GAME_OFF;
         return;
     }
+
+    if (SDL_Init(SDL_INIT_AUDIO) < 0) {
+        printf("Failed to initialize SDL: %s\n", SDL_GetError());
+        return;
+    }
+
+    if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0) {
+        printf("SDL_mixer could not initialize! SDL_mixer Error: %s\n", Mix_GetError());
+        return;
+    }
+
 
     /************************************
     I was trying to debug my code using the printf function but nothing was showing up in the console.

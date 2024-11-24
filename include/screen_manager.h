@@ -15,6 +15,14 @@ Screen* createModeScreen();
 // Function to initialize game screen
 Screen* createGameScreen();
 
+Screen* createGameOverScreen();
+
+Screen* createAchievementScreen(Achievement achievements[], int totalAchievements);
+
+Screen* createSettingsScreen();
+
+void displayBestThreeTimes(SDL_Surface *screen);
+
 // Function to render any screen
 void renderScreen(Screen *Screen, SDL_Surface *screen);
 
